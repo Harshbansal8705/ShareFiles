@@ -9,17 +9,75 @@
 </head>
 
 <body>
-    <h1>Drop files here:</h1>
-    <form action="/" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" id="file" multiple>
-        <button type="submit">Upload</button>
-    </form>
-    <h1>Available files on the server: </h1>
-    <ul>
-        {% for i in lst %}
-        <li><a href="/files/{{i}}">{{i}}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="files">
+        <h1>Files:</h1>
+        <form action="/files" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" multiple>
+            <button type="submit">Upload</button>
+        </form>
+        <h2>Available files on the server: </h2>
+        {% if files|length > 0 %}
+        <ul>
+            {% for file in files %}
+            <li><a href="/files/{{file}}">{{file}}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No file found</p>
+        {% endif %}
+    </div>
+    <div class="text">
+        <h1>Texts:</h1>
+        <form action="/text" method="POST">
+            <input type="text" name="text">
+            <button type="submit">Upload</button>
+        </form>
+        <h2>Available Texts:</h2>
+        {% if texts|length > 0 %}
+        <ul>
+            {% for text in texts %}
+            <li>
+                {{text}}
+                <button onclick="copytoClipboard('{{text}}')">Copy</button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No text found</p>
+        {% endif %}
+    </div>
 </body>
+
+<script>
+    function copytoClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                alert("Copied to clipboard");
+            }, function () {
+                alert('[ERROR] Copying to the clipboard failed!');
+            });
+        } else {
+            // Use the 'out of viewport hidden text area' trick
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Move textarea out of the viewport so it's not visible
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+
+            document.body.prepend(textArea);
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                alert("Copied to clipboard");
+            } catch (error) {
+                console.error(error);
+            } finally {
+                textArea.remove();
+            }
+        }
+    }
+</script>
 
 </html>
